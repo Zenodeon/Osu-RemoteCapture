@@ -1,18 +1,23 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.EventSystems;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 public class InputSystem : MonoBehaviour
 {
-    public UDPTest udp;
-    public TestS ss;
+    private UDPCommTemp udp = new UDPCommTemp();
 
     Dictionary<int, TouchPhase> touchPoint = new Dictionary<int, TouchPhase>();
 
     private void Start()
     {
-        
+        udp.Connect();
+    }
+
+    private void OnApplicationQuit()
+    {
+        udp.Connect(false);
     }
 
     void Update()
@@ -29,24 +34,26 @@ public class InputSystem : MonoBehaviour
                 if (phase == TouchPhase.Ended)
                 {
                     touchPoint.Remove(id);
-                    test(id, phase);
+                    SendTouchState(touch);
                 }
                 else if (touchPoint[id] != phase)
-                    test(id, phase);
+                    SendTouchState(touch);
             }
             else
             {
                 touchPoint.Add(id, phase);
-                test(id, phase);
+                SendTouchState(touch);
             }
         }
     }
 
-    void test(int id, TouchPhase phase)
+    void SendTouchState(Touch touch)
     {
-        if (phase == TouchPhase.Stationary)
+        TouchState touchState = new TouchState(touch);
+
+        if (touchState.phase == TouchPhase.Stationary | touchState.phase == TouchPhase.Moved)
             return;
 
-        udp.send(id + " :: " + phase.ToString());
+        udp.send(JsonConvert.SerializeObject(touchState));
     }
 }
