@@ -54,6 +54,31 @@ public class InputSystem : MonoBehaviour
         if (touchState.phase == TouchPhase.Stationary | touchState.phase == TouchPhase.Moved)
             return;
 
+        if (touchState.touchIndex <= 1)
+            if (touchState.phase == TouchPhase.Began)
+                Haptic(touchState.touchIndex);
+                //Handheld.Vibrate();
+
         udp.send(JsonConvert.SerializeObject(touchState));
+    }
+
+    void Haptic(int a)
+    {
+        /*
+        HapticFeedbackTypes haptic = HapticFeedbackTypes.MEDIUM;
+
+        if (a == 0)
+            haptic = HapticFeedbackTypes.LIGHT;
+        else if (a == 1)
+            haptic = HapticFeedbackTypes.HEAVY;
+
+        IOSNative.StartHapticFeedback(haptic);
+        */
+
+        if (a == 0)
+            HapticFeedback.ImpactOccurred(ImpactFeedbackStyle.Rigid);
+
+        if (a == 1)
+            HapticFeedback.ImpactOccurred(ImpactFeedbackStyle.Soft);
     }
 }
